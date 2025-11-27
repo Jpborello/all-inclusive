@@ -46,13 +46,13 @@ const Footer = () => {
                         <h4 className="text-lg font-serif text-white mb-4">Contacto</h4>
                         <ul className="space-y-2 text-sm text-gray-400">
                             <li className="flex items-center">
-                                <span className="mr-2">📍</span> Calle Falsa 123, Buenos Aires
+                                <span className="mr-2">📍</span> Rosario, Santa Fe
                             </li>
                             <li className="flex items-center">
-                                <span className="mr-2">📞</span> +54 11 1234-5678
+                                <span className="mr-2">📞</span> +54 341 284-4169
                             </li>
                             <li className="flex items-center">
-                                <span className="mr-2">✉️</span> contacto@formen.com
+                                <span className="mr-2">✉️</span> contacto@allinclusive.com.ar
                             </li>
                         </ul>
                     </div>
@@ -61,10 +61,8 @@ const Footer = () => {
                 <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
                     <p>&copy; {new Date().getFullYear()} All Inclusive. Todos los derechos reservados.</p>
                     <div className="flex space-x-4 mt-4 md:mt-0">
-                        {/* Social Icons Placeholders */}
-                        <a href="#" className="hover:text-brand-gold">Instagram</a>
-                        <a href="#" className="hover:text-brand-gold">Facebook</a>
-                        <a href="#" className="hover:text-brand-gold">Twitter</a>
+                        <a href="https://www.instagram.com/allinclusiveindumentaria/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold">Instagram</a>
+                        <a href="https://wa.me/543412844169" target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold">WhatsApp</a>
                     </div>
                 </div>
             </div>
