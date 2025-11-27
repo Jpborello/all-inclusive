@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+    --color-brand-gold: #D4AF37;
+    --color-brand-dark: #051626;
+    --color-brand-light: #F5F5F5;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+    body {
+        font-family: var(--font-sans);
+        color: #1f2937;
+        /* gray-800 */
+        background-color: var(--color-brand-light);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-serif);
+        color: var(--color-brand-dark);
+    }
+}
