@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Instagram, MessageCircle } from 'lucide-react';
+import LocationMap from '../common/LocationMap';
 
 const Footer = () => {
     return (
@@ -46,7 +48,7 @@ const Footer = () => {
                         <h4 className="text-lg font-serif text-white mb-4">Contacto</h4>
                         <ul className="space-y-2 text-sm text-gray-400">
                             <li className="flex items-center">
-                                <span className="mr-2">📍</span> Rosario, Santa Fe
+                                <span className="mr-2">📍</span> Mendoza 6440, Rosario
                             </li>
                             <li className="flex items-center">
                                 <span className="mr-2">📞</span> +54 341 284-4169
@@ -58,11 +60,34 @@ const Footer = () => {
                     </div>
                 </div>
 
+                {/* Map Section */}
+                <div className="mb-8 border-t border-brand-gold/10 pt-8">
+                    <div className="flex flex-col md:flex-row items-center gap-8">
+                        <div className="w-full md:w-1/3 text-center md:text-left">
+                            <h4 className="text-xl font-serif text-brand-gold mb-2">Visítanos</h4>
+                            <p className="text-gray-400 text-sm mb-4">
+                                Vení a conocer nuestro showroom exclusivo en el corazón de Rosario.
+                                Atención personalizada y el mejor asesoramiento.
+                            </p>
+                            <button className="text-brand-gold border border-brand-gold px-6 py-2 text-sm uppercase tracking-widest hover:bg-brand-gold hover:text-brand-dark transition-colors">
+                                Cómo llegar
+                            </button>
+                        </div>
+                        <div className="w-full md:w-2/3 h-64">
+                            <LocationMap />
+                        </div>
+                    </div>
+                </div>
+
                 <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
                     <p>&copy; {new Date().getFullYear()} All Inclusive. Todos los derechos reservados.</p>
                     <div className="flex space-x-4 mt-4 md:mt-0">
-                        <a href="https://www.instagram.com/allinclusiveindumentaria/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold">Instagram</a>
-                        <a href="https://wa.me/543412844169" target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold">WhatsApp</a>
+                        <a href="https://www.instagram.com/allinclusiveindumentaria/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold transition-colors" aria-label="Instagram">
+                            <Instagram size={20} />
+                        </a>
+                        <a href="https://wa.me/543412844169" target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold transition-colors" aria-label="WhatsApp">
+                            <MessageCircle size={20} />
+                        </a>
                     </div>
                 </div>
             </div>

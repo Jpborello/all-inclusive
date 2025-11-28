@@ -7,6 +7,7 @@ import ProductList from './components/product/ProductList';
 import ProductDetail from './components/product/ProductDetail';
 import Cart from './components/cart/Cart';
 import Checkout from './components/cart/Checkout';
+import SocialFloatingButtons from './components/common/SocialFloatingButtons';
 
 import { useLocation } from 'react-router-dom';
 import AdminLayout from './components/admin/AdminLayout';
@@ -60,6 +61,7 @@ function App() {
       </Routes>
 
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <SocialFloatingButtons />}
     </div>
   );
 }

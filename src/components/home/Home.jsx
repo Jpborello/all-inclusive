@@ -1,10 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import HeroCarousel from './HeroCarousel';
 import ProductCard from '../product/ProductCard';
 import { products, categories } from '../../data/mockData';
 
 const Home = () => {
     const featuredProducts = products.filter(p => p.isFeatured);
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState(null);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setStatus(null);
+
+        try {
+            const response = await fetch('https://neo-core-sys.app.n8n.cloud/webhook-test/43b85194-ffea-43c6-aa66-32c16cbe1597', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, source: 'web_subscription' }),
+            });
+
+            if (response.ok) {
+                setStatus('success');
+                setEmail('');
+            } else {
+                setStatus('error');
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            setStatus('error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <main className="flex-grow">
@@ -72,16 +103,30 @@ const Home = () => {
                     <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
                         Prepárate para los descuentos más exclusivos del año. Regístrate para acceso anticipado.
                     </p>
-                    <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
                         <input
                             type="email"
                             placeholder="Tu email"
-                            className="px-4 py-3 text-gray-900 w-full focus:outline-none focus:ring-2 focus:ring-brand-gold"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            disabled={loading}
+                            className="px-4 py-3 text-gray-900 w-full focus:outline-none focus:ring-2 focus:ring-brand-gold disabled:opacity-50"
                         />
-                        <button className="bg-brand-gold text-brand-dark px-8 py-3 font-bold uppercase hover:bg-white transition-colors whitespace-nowrap">
-                            Suscribirse
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="bg-brand-gold text-brand-dark px-8 py-3 font-bold uppercase hover:bg-white transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Enviando...' : 'Suscribirse'}
                         </button>
-                    </div>
+                    </form>
+                    {status === 'success' && (
+                        <p className="text-green-400 mt-4 font-medium">¡Gracias por suscribirte! Te contactaremos pronto.</p>
+                    )}
+                    {status === 'error' && (
+                        <p className="text-red-400 mt-4 font-medium">Hubo un error. Por favor intenta nuevamente.</p>
+                    )}
                 </div>
             </section>
         </main>
