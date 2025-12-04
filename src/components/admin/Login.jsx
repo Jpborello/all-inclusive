@@ -13,22 +13,50 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+        console.log("🔵 Intentando login con:", email);
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
-            if (error) throw error;
+            console.log("🟢 Respuesta login:", loginData, loginError);
 
+            if (loginError) throw loginError;
+
+            const user = loginData.user;
+            console.log("👤 Usuario:", user.id);
+
+            const { data: roleData, error: roleError } = await supabase
+                .from("users_roles")
+                .select("role")
+                .eq("user_id", user.id)
+                .single();
+
+            console.log("📄 Role encontrado:", roleData);
+
+            if (roleError) {
+                console.error("❌ Error roles:", roleError);
+                throw new Error("No tienes un rol asignado. Contactar al administrador.");
+            }
+
+            if (roleData.role !== "admin") {
+                console.warn("⚠ Usuario no es admin");
+                throw new Error("No tienes permisos para acceder al panel.");
+            }
+
+            console.log("🚀 Acceso permitido, redirigiendo...");
             navigate('/admin');
+
         } catch (error) {
+            console.error("❗ ERROR LOGIN:", error);
             setError(error.message);
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-brand-dark">
@@ -71,6 +99,7 @@ const Login = () => {
                             required
                         />
                     </div>
+
                     <button
                         type="submit"
                         disabled={loading}
