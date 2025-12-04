@@ -1,16 +1,37 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../product/ProductCard';
 import { supabase } from '../../supabase/client';
+import SEO from '../common/SEO';
 
 const ProductList = () => {
+    const [searchParams] = useSearchParams();
+    const categoryIdParam = searchParams.get('category');
+
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [priceRange, setPriceRange] = useState(300000);
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [categoriesList, setCategoriesList] = useState([]);
 
     useEffect(() => {
+        fetchCategories();
         fetchProducts();
     }, []);
+
+    useEffect(() => {
+        if (categoryIdParam && categoriesList.length > 0) {
+            const cat = categoriesList.find(c => c.id === parseInt(categoryIdParam));
+            if (cat) {
+                setSelectedCategories([cat.name]);
+            }
+        }
+    }, [categoryIdParam, categoriesList]);
+
+    const fetchCategories = async () => {
+        const { data } = await supabase.from('categories').select('*');
+        if (data) setCategoriesList(data);
+    };
 
     const fetchProducts = async () => {
         try {
@@ -69,12 +90,15 @@ const ProductList = () => {
         return categoryMatch && priceMatch;
     });
 
-    const categoriesList = [
-        'Remeras', 'Camisas', 'Bermudas', 'Camperas', 'Pantalon Gabardina', 'Short Baño'
-    ];
+
 
     return (
         <div className="container mx-auto px-4 py-8">
+            <SEO
+                title={selectedCategories.length > 0 ? selectedCategories.join(', ') : 'Productos'}
+                description="Explora nuestra colección completa de indumentaria masculina."
+                url="/productos"
+            />
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Sidebar Filters */}
                 <aside className="w-full md:w-64 flex-shrink-0">
@@ -97,15 +121,15 @@ const ProductList = () => {
                                     </label>
                                 </li>
                                 {categoriesList.map(cat => (
-                                    <li key={cat}>
+                                    <li key={cat.id}>
                                         <label className="flex items-center cursor-pointer hover:text-brand-gold transition-colors">
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 accent-brand-gold"
-                                                checked={selectedCategories.includes(cat)}
-                                                onChange={() => toggleCategory(cat)}
+                                                checked={selectedCategories.includes(cat.name)}
+                                                onChange={() => toggleCategory(cat.name)}
                                             />
-                                            {cat}
+                                            {cat.name}
                                         </label>
                                     </li>
                                 ))}

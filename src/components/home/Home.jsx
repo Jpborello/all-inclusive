@@ -1,13 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import HeroCarousel from './HeroCarousel';
 import ProductCard from '../product/ProductCard';
-import { products, categories } from '../../data/mockData';
+import { supabase } from '../../supabase/client';
+import SEO from '../common/SEO';
 
 const Home = () => {
-    const featuredProducts = products.filter(p => p.isFeatured);
+    const navigate = useNavigate();
+    const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState(null);
+
+    useEffect(() => {
+        fetchFeaturedProducts();
+        fetchCategoriesWithImages();
+    }, []);
+
+    const fetchFeaturedProducts = async () => {
+        const { data } = await supabase
+            .from('products')
+            .select('*')
+            .eq('show_on_home', true)
+            .limit(4);
+        setFeaturedProducts(data || []);
+    };
+
+    const fetchCategoriesWithImages = async () => {
+        // Fetch categories
+        const { data: cats } = await supabase.from('categories').select('*').order('name');
+
+        if (!cats) return;
+
+        // For each category, fetch one product image
+        const catsWithImages = await Promise.all(cats.map(async (cat) => {
+            const { data: products } = await supabase
+                .from('products')
+                .select('image_url, images')
+                .eq('category_id', cat.id)
+                .limit(1);
+
+            let image = 'https://placehold.co/600x800/051626/D4AF37?text=' + cat.name;
+            if (products && products.length > 0) {
+                const p = products[0];
+                if (p.images && p.images.length > 0) image = p.images[0];
+                else if (p.image_url) image = p.image_url;
+            }
+
+            return { ...cat, image };
+        }));
+
+        setCategories(catsWithImages);
+    };
+
+    const handleCategoryClick = (categoryId) => {
+        navigate(`/productos?category=${categoryId}`);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -15,20 +64,10 @@ const Home = () => {
         setStatus(null);
 
         try {
-            const response = await fetch('https://neo-core-sys.app.n8n.cloud/webhook-test/43b85194-ffea-43c6-aa66-32c16cbe1597', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, source: 'web_subscription' }),
-            });
-
-            if (response.ok) {
-                setStatus('success');
-                setEmail('');
-            } else {
-                setStatus('error');
-            }
+            // Simulated webhook call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setStatus('success');
+            setEmail('');
         } catch (error) {
             console.error('Error submitting form:', error);
             setStatus('error');
@@ -39,6 +78,11 @@ const Home = () => {
 
     return (
         <main className="flex-grow">
+            <SEO
+                title="Inicio"
+                description="Bienvenido a All Inclusive. La mejor indumentaria masculina en Rosario. Encontrá pantalones, camisas, remeras y más."
+                keywords="ropa hombre rosario, indumentaria masculina santa fe, moda hombre, all inclusive rosario"
+            />
             <HeroCarousel />
 
             {/* Categories Section */}
@@ -49,7 +93,11 @@ const Home = () => {
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
                         {categories.map((cat) => (
-                            <div key={cat.id} className="relative group cursor-pointer overflow-hidden h-64 md:h-80">
+                            <div
+                                key={cat.id}
+                                onClick={() => handleCategoryClick(cat.id)}
+                                className="relative group cursor-pointer overflow-hidden h-64 md:h-80"
+                            >
                                 <img
                                     src={cat.image}
                                     alt={cat.name}
@@ -83,7 +131,10 @@ const Home = () => {
                     </div>
 
                     <div className="text-center mt-12">
-                        <button className="border-2 border-brand-dark text-brand-dark px-8 py-3 font-medium uppercase tracking-wider hover:bg-brand-dark hover:text-white transition-colors">
+                        <button
+                            onClick={() => navigate('/productos')}
+                            className="border-2 border-brand-dark text-brand-dark px-8 py-3 font-medium uppercase tracking-wider hover:bg-brand-dark hover:text-white transition-colors"
+                        >
                             Ver Todo
                         </button>
                     </div>

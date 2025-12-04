@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import { useCart } from '../../context/CartContext';
+import SEO from '../common/SEO';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -66,6 +67,14 @@ const ProductDetail = () => {
 
     return (
         <div className="container mx-auto px-4 py-12">
+            <SEO
+                title={product.name}
+                description={product.description}
+                image={product.image_url}
+                url={`/producto/${product.id}`}
+                keywords={`${product.name}, ${product.categories?.name}, ropa hombre, rosario`}
+                type="product"
+            />
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Image Gallery */}
                 <div className="w-full md:w-1/2">
