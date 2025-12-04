@@ -15,6 +15,8 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import Login from './components/admin/Login';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import ProductForm from './components/admin/ProductForm';
+import Orders from './components/admin/Orders';
+import Settings from './components/admin/Settings';
 
 function App() {
   const location = useLocation();
@@ -55,6 +57,22 @@ function App() {
           <ProtectedRoute>
             <AdminLayout>
               <ProductForm />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/orders" element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <Orders />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/settings" element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <Settings />
             </AdminLayout>
           </ProtectedRoute>
         } />

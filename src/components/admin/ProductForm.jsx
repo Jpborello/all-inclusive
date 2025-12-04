@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import { useDropzone } from 'react-dropzone';
 
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXX'];
+
 const ProductForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -17,9 +19,14 @@ const ProductForm = () => {
         name: '',
         description: '',
         price: '',
-        stock: '',
+        stock: 0,
         category_id: '',
-        image_url: ''
+        image_url: '', // Kept for backward compatibility (will be images[0])
+        images: [],   // Array of image URLs
+        show_on_home: false,
+        sizes: {
+            XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0, XXXL: 0, XXXX: 0
+        }
     });
 
     useEffect(() => {
@@ -29,8 +36,13 @@ const ProductForm = () => {
         }
     }, [id]);
 
+    useEffect(() => {
+        const totalStock = Object.values(formData.sizes).reduce((a, b) => Number(a) + Number(b), 0);
+        setFormData(prev => ({ ...prev, stock: totalStock }));
+    }, [formData.sizes]);
+
     const fetchCategories = async () => {
-        const { data } = await supabase.from('categories').select('*');
+        const { data } = await supabase.from('categories').select('*').order('name');
         setCategories(data || []);
     };
 
@@ -44,13 +56,25 @@ const ProductForm = () => {
 
             if (error) throw error;
 
+            const savedSizes = data.sizes || {};
+            const mergedSizes = { ...formData.sizes, ...savedSizes };
+
+            // Ensure images array is populated
+            let images = data.images || [];
+            if (images.length === 0 && data.image_url) {
+                images = [data.image_url];
+            }
+
             setFormData({
                 name: data.name,
                 description: data.description || '',
                 price: data.price,
                 stock: data.stock,
-                category_id: data.category_id,
-                image_url: data.image_url || ''
+                category_id: data.category_id || '',
+                image_url: data.image_url || '',
+                images: images,
+                show_on_home: data.show_on_home || false,
+                sizes: mergedSizes
             });
         } catch (error) {
             console.error('Error fetching product:', error);
@@ -61,26 +85,39 @@ const ProductForm = () => {
     };
 
     const onDrop = useCallback(async (acceptedFiles) => {
-        const file = acceptedFiles[0];
-        if (!file) return;
+        if (acceptedFiles.length === 0) return;
 
         setUploading(true);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random()}.${fileExt}`;
-            const filePath = `${fileName}`;
+            const newImages = [];
 
-            const { error: uploadError } = await supabase.storage
-                .from('products')
-                .upload(filePath, file);
+            for (const file of acceptedFiles) {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Math.random()}.${fileExt}`;
+                const filePath = `${fileName}`;
 
-            if (uploadError) throw uploadError;
+                const { error: uploadError } = await supabase.storage
+                    .from('products')
+                    .upload(filePath, file);
 
-            const { data: { publicUrl } } = supabase.storage
-                .from('products')
-                .getPublicUrl(filePath);
+                if (uploadError) throw uploadError;
 
-            setFormData(prev => ({ ...prev, image_url: publicUrl }));
+                const { data: { publicUrl } } = supabase.storage
+                    .from('products')
+                    .getPublicUrl(filePath);
+
+                newImages.push(publicUrl);
+            }
+
+            setFormData(prev => {
+                const updatedImages = [...prev.images, ...newImages];
+                return {
+                    ...prev,
+                    images: updatedImages,
+                    image_url: updatedImages.length > 0 ? updatedImages[0] : ''
+                };
+            });
+
         } catch (error) {
             alert('Error subiendo imagen: ' + error.message);
         } finally {
@@ -88,17 +125,41 @@ const ProductForm = () => {
         }
     }, []);
 
+    const removeImage = (indexToRemove) => {
+        setFormData(prev => {
+            const updatedImages = prev.images.filter((_, index) => index !== indexToRemove);
+            return {
+                ...prev,
+                images: updatedImages,
+                image_url: updatedImages.length > 0 ? updatedImages[0] : ''
+            };
+        });
+    };
+
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         accept: {
             'image/*': ['.jpeg', '.png', '.jpg', '.webp']
         },
-        maxFiles: 1
+        maxFiles: 10
     });
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    const handleSizeChange = (size, qty) => {
+        setFormData(prev => ({
+            ...prev,
+            sizes: {
+                ...prev.sizes,
+                [size]: Number(qty)
+            }
+        }));
     };
 
     const handleSubmit = async (e) => {
@@ -110,7 +171,10 @@ const ProductForm = () => {
                 ...formData,
                 price: parseFloat(formData.price),
                 stock: parseInt(formData.stock),
-                category_id: parseInt(formData.category_id)
+                category_id: formData.category_id ? parseInt(formData.category_id) : null,
+                sizes: formData.sizes,
+                images: formData.images,
+                image_url: formData.images.length > 0 ? formData.images[0] : null // Sync main image
             };
 
             if (isEditing) {
@@ -200,23 +264,31 @@ const ProductForm = () => {
                             />
                         </div>
 
-                        {/* Stock */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Stock (Unidades)</label>
-                            <input
-                                type="number"
-                                name="stock"
-                                required
-                                min="0"
-                                value={formData.stock}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-brand-gold"
-                            />
+                        {/* Sizes Grid */}
+                        <div className="col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <label className="block text-sm font-medium text-gray-700 mb-3">Stock por Talle</label>
+                            <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+                                {SIZES.map(size => (
+                                    <div key={size}>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1 text-center">{size}</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={formData.sizes[size]}
+                                            onChange={(e) => handleSizeChange(size, e.target.value)}
+                                            className="w-full px-2 py-1 text-center border border-gray-300 rounded focus:outline-none focus:border-brand-gold text-sm"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-3 text-right text-sm text-gray-600">
+                                Total Stock: <span className="font-bold text-brand-dark">{formData.stock}</span>
+                            </div>
                         </div>
 
-                        {/* Image Upload Drag & Drop */}
+                        {/* Multi-Image Upload */}
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Imagen del Producto</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Galería de Imágenes</label>
 
                             <div
                                 {...getRootProps()}
@@ -225,32 +297,59 @@ const ProductForm = () => {
                             >
                                 <input {...getInputProps()} />
                                 {uploading ? (
-                                    <div className="text-brand-gold font-medium">Subiendo imagen...</div>
+                                    <div className="text-brand-gold font-medium">Subiendo imágenes...</div>
                                 ) : (
                                     <div>
-                                        <p className="text-gray-600">Arrastrá una imagen acá, o hacé clic para seleccionar</p>
-                                        <p className="text-xs text-gray-400 mt-1">(JPG, PNG, WEBP)</p>
+                                        <p className="text-gray-600">Arrastrá tus imágenes acá, o hacé clic para seleccionar</p>
+                                        <p className="text-xs text-gray-400 mt-1">(JPG, PNG, WEBP - Máx 10)</p>
                                     </div>
                                 )}
                             </div>
 
-                            {formData.image_url && (
-                                <div className="mt-4 relative inline-block group">
-                                    <img
-                                        src={formData.image_url}
-                                        alt="Preview"
-                                        className="h-40 object-contain border border-gray-200 rounded bg-gray-50"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
-                                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        title="Eliminar imagen"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                    </button>
+                            {/* Image Grid */}
+                            {formData.images.length > 0 && (
+                                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {formData.images.map((img, index) => (
+                                        <div key={index} className="relative group aspect-square">
+                                            <img
+                                                src={img}
+                                                alt={`Preview ${index}`}
+                                                className="w-full h-full object-cover rounded border border-gray-200"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(index)}
+                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                                title="Eliminar imagen"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                            {index === 0 && (
+                                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-1">
+                                                    Principal
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
+                        </div>
+
+                        {/* Show on Home Toggle */}
+                        <div className="col-span-2">
+                            <div className="flex items-center">
+                                <input
+                                    id="show_on_home"
+                                    name="show_on_home"
+                                    type="checkbox"
+                                    checked={formData.show_on_home}
+                                    onChange={handleChange}
+                                    className="h-4 w-4 text-brand-gold focus:ring-brand-gold border-gray-300 rounded"
+                                />
+                                <label htmlFor="show_on_home" className="ml-2 block text-sm text-gray-900">
+                                    Mostrar en Home (Destacado)
+                                </label>
+                            </div>
                         </div>
 
                         {/* Description */}

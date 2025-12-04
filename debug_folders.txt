@@ -1,0 +1,16 @@
+[
+  "Bermudas",
+  "Camisas",
+  "Camperas",
+  "Pantalon_Gabardina",
+  "Remeras",
+  "Short_Bano",
+  "0.5819806641131475.png"
+]
+Categories in DB: [{"id":1,"slug":"camisas"},{"id":2,"slug":"pantalones"},{"id":3,"slug":"sacos"},{"id":4,"slug":"accesorios"},{"id":5,"slug":"camperas"},{"id":6,"slug":"remeras"},{"id":7,"slug":"bermudas"},{"id":8,"slug":"calzado"}]
+Folder Bermudas: Found 20 files.
+Folder Camisas: Found 2 files.
+Folder Camperas: Found 1 files.
+WARNING: Category slug 'pantalon-gabardina' not found in DB.
+Folder Remeras: Found 24 files.
+WARNING: Category slug 'short-bano' not found in DB.
