@@ -1,6 +1,6 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
+import { Routes, Route, useLocation } from 'react-router-dom';
+
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Home from './components/home/Home';
@@ -10,7 +10,6 @@ import Cart from './components/cart/Cart';
 import Checkout from './components/cart/Checkout';
 import SocialFloatingButtons from './components/common/SocialFloatingButtons';
 
-import { useLocation } from 'react-router-dom';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Login from './components/admin/Login';
@@ -24,66 +23,64 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <HelmetProvider>
-      <div className="flex flex-col min-h-screen">
-        {!isAdminRoute && <Header />}
+    <div className="flex flex-col min-h-screen">
+      {!isAdminRoute && <Header />}
 
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/productos" element={<ProductList />} />
-          <Route path="/producto/:id" element={<ProductDetail />} />
-          <Route path="/carrito" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Home />} />
+        <Route path="/productos" element={<ProductList />} />
+        <Route path="/producto/:id" element={<ProductDetail />} />
+        <Route path="/carrito" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<Login />} />
+        {/* Admin */}
+        <Route path="/admin/login" element={<Login />} />
 
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <AdminDashboard />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminDashboard />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
 
-          <Route path="/admin/producto/nuevo" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <ProductForm />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
+        <Route path="/admin/producto/nuevo" element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <ProductForm />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
 
-          <Route path="/admin/producto/:id" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <ProductForm />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
+        <Route path="/admin/producto/:id" element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <ProductForm />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
 
-          <Route path="/admin/orders" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <Orders />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
+        <Route path="/admin/orders" element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <Orders />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
 
-          <Route path="/admin/settings" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <Settings />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-        </Routes>
+        <Route path="/admin/settings" element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <Settings />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+      </Routes>
 
-        {!isAdminRoute && <Footer />}
-        {!isAdminRoute && <SocialFloatingButtons />}
-      </div>
-    </HelmetProvider>
+      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <SocialFloatingButtons />}
+    </div>
   );
 }
 
