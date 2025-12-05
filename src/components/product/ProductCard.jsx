@@ -6,7 +6,7 @@ const ProductCard = ({ product }) => {
         <div className="group bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
             <div className="relative overflow-hidden aspect-[3/4]">
                 <img
-                    src={product.image}
+                    src={product.image_url || product.image}
                     alt={product.name}
                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                 />

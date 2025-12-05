@@ -17,6 +17,7 @@ import ProtectedRoute from './components/admin/ProtectedRoute';
 import ProductForm from './components/admin/ProductForm';
 import Orders from './components/admin/Orders';
 import Settings from './components/admin/Settings';
+import CategorySetup from './components/admin/CategorySetup';
 
 function App() {
   const location = useLocation();
@@ -73,6 +74,14 @@ function App() {
           <ProtectedRoute>
             <AdminLayout>
               <Settings />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/setup-categories" element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <CategorySetup />
             </AdminLayout>
           </ProtectedRoute>
         } />
