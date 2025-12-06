@@ -90,6 +90,11 @@ const Footer = () => {
                         </a>
                     </div>
                 </div>
+
+                {/* Developer Credit */}
+                <div className="text-[12px] opacity-80 mt-6 text-center text-gray-500">
+                    Desarrollado por <a href="https://neo-core-sys.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-brand-gold transition-colors no-underline">Neo Core Sys</a>
+                </div>
             </div>
         </footer>
     );
