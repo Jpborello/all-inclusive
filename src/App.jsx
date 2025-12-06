@@ -1,6 +1,8 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
+import ScrollToTop from './components/common/ScrollToTop';
+
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Home from './components/home/Home';
@@ -26,6 +28,7 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <ScrollToTop />
       {!isAdminRoute && <Header />}
 
       <Routes>

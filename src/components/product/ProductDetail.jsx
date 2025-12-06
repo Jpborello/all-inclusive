@@ -60,10 +60,12 @@ const ProductDetail = () => {
     if (!product) return null;
 
     const hasSizes = product.sizes && Object.keys(product.sizes).length > 0;
-    const sortedSizes = hasSizes ? Object.entries(product.sizes).sort((a, b) => {
-        const order = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXX'];
-        return order.indexOf(a[0]) - order.indexOf(b[0]);
-    }) : [];
+    const sortedSizes = hasSizes ? Object.entries(product.sizes)
+        .filter(([_, qty]) => qty > 0) // Filter out sizes with 0 stock
+        .sort((a, b) => {
+            const order = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXX'];
+            return order.indexOf(a[0]) - order.indexOf(b[0]);
+        }) : [];
 
     return (
         <div className="container mx-auto px-4 py-12">
@@ -137,20 +139,17 @@ const ProductDetail = () => {
                                             }}
                                             disabled={!isAvailable}
                                             className={`
-                                                group relative border rounded-md py-3 px-4 flex flex-col items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1
-                                                ${!isAvailable ? 'bg-gray-50 text-gray-300 cursor-not-allowed opacity-60' : ''}
-                                                ${selectedSize === size ? 'border-brand-gold ring-2 ring-brand-gold text-brand-dark bg-brand-gold/5' : 'border-gray-200 text-gray-900'}
+                                                group relative border rounded-md py-3 px-4 flex flex-col items-center justify-center text-sm font-medium uppercase transition-all duration-200 focus:outline-none sm:flex-1
+                                                ${selectedSize === size
+                                                    ? 'bg-brand-gold border-brand-gold text-brand-dark shadow-md scale-105'
+                                                    : 'bg-brand-dark border-brand-dark text-white hover:bg-opacity-90 hover:shadow-lg'
+                                                }
                                             `}
                                         >
-                                            <span className="font-bold">{size}</span>
+                                            <span className="font-bold text-lg">{size}</span>
                                             {isAvailable && (
-                                                <span className="text-[10px] text-gray-500 mt-1">
+                                                <span className={`text-[10px] mt-1 font-semibold ${selectedSize === size ? 'text-brand-dark/80' : 'text-brand-gold'}`}>
                                                     ({qty} disp.)
-                                                </span>
-                                            )}
-                                            {!isAvailable && (
-                                                <span className="absolute inset-0 w-full h-full flex items-center justify-center">
-                                                    <span className="w-full border-t border-gray-300 -rotate-45"></span>
                                                 </span>
                                             )}
                                         </button>
