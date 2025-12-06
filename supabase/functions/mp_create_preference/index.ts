@@ -14,68 +14,59 @@ serve(async (req) => {
     }
 
     try {
-        const { items, user_id, seller_id } = await req.json();
+        const { items, user_id, origin } = await req.json();
 
-        if (!items || !user_id) {
-            throw new Error("Missing items or user_id");
+        if (!items) {
+            throw new Error("Missing items");
         }
 
-        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-        const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-        const supabase = createClient(supabaseUrl, supabaseKey);
+        // Use the Access Token directly from environment variables
+        const accessToken = Deno.env.get("MP_ACCESS_TOKEN");
 
-        // ----------------------------------------------
-        // 1. Determinar vendedor al que se le acredita
-        // ----------------------------------------------
-        const vendedor = seller_id || user_id;
-
-        console.log("Buscando credenciales para:", vendedor);
-
-        const { data: creds, error: credsError } = await supabase
-            .from("mp_credentials")
-            .select("access_token")
-            .eq("user_id", vendedor)
-            .single();
-
-        if (credsError || !creds) {
-            console.error("No se encontraron tokens OAuth:", credsError);
-            throw new Error("Seller account is not connected to Mercado Pago");
+        if (!accessToken) {
+            console.error("MP_ACCESS_TOKEN not set in Edge Function secrets");
+            throw new Error("Server configuration error: Missing MP_ACCESS_TOKEN");
         }
 
-        console.log("TOKEN ENCONTRADO OK");
+        console.log("Creating preference with provided items...");
+
+        // FIX: Using public HTTPS URL because Mercado Pago rejects localhost for auto_return
+        const baseUrl = "https://allinclusive.com.ar";
+
+        console.log("DEBUG: Using Hardcoded Base URL:", baseUrl);
 
         // ----------------------------------------------
         // 2. Crear preference
         // ----------------------------------------------
         const preferenceData = {
             items,
-            external_reference: String(user_id),
+            external_reference: user_id ? String(user_id) : "guest",
 
             metadata: {
-                user_id,
-                seller_id: vendedor,
-                items,
+                user_id: user_id || "guest",
+                items_count: items.length
             },
 
             back_urls: {
-                success: "https://allinclusive.com/success",
-                failure: "https://allinclusive.com/failure",
-                pending: "https://allinclusive.com/pending",
+                success: `${baseUrl}/success`,
+                failure: `${baseUrl}/failure`,
+                pending: `${baseUrl}/pending`,
             },
 
             auto_return: "approved",
 
-            notification_url:
-                "https://tpitmedayuzfjooxyzgm.supabase.co/functions/v1/mp_webhook",
+            notification_url: "https://tpitmedayuzfjooxyzgm.supabase.co/functions/v1/mp_webhook",
         };
-        console.log("ACCESS TOKEN QUE ESTOY USANDO:", creds.access_token);
+
+        console.log("DEBUG: Preference Data to be sent:", JSON.stringify(preferenceData));
+
         const mpResponse = await fetch(
             "https://api.mercadopago.com/checkout/preferences",
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${creds.access_token}`,
+                    Authorization: `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify(preferenceData),
             }
@@ -87,6 +78,8 @@ serve(async (req) => {
             console.error("MP Error:", mpData);
             throw new Error(`Mercado Pago Error: ${JSON.stringify(mpData)}`);
         }
+
+        console.log("Preference created successfully:", mpData.id);
 
         return new Response(
             JSON.stringify({
@@ -101,8 +94,12 @@ serve(async (req) => {
     catch (error) {
         console.error("CREATE PREFERENCE ERROR:", error);
 
+        // Return detailed error for debugging
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({
+                error: error.message,
+                details: error.toString()
+            }),
             {
                 status: 400,
                 headers: { ...corsHeaders, "Content-Type": "application/json" },

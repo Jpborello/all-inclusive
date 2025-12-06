@@ -21,21 +21,97 @@ const Checkout = () => {
         e.preventDefault();
 
         try {
-            // 1. Create Order (Simplified for now)
-            // In a real app, you would create the order in the 'orders' table first.
+            // 1. Create Order in Database
+            const orderData = {
+                user_email: formData.email,
+                total: cartTotal,
+                status: 'pending',
+                shipping_details: formData // Store full shipping info
+            };
 
-            // 2. Decrease Stock for each item
-            for (const item of cart) {
-                const { error } = await supabase.rpc('decrease_stock', {
-                    product_id: item.id,
-                    quantity_sold: item.quantity
-                });
+            const { data: order, error: orderError } = await supabase
+                .from('orders')
+                .insert([orderData])
+                .select()
+                .single();
 
-                if (error) throw error;
+            if (orderError) throw orderError;
+
+            // 2. Create Order Items
+            const orderItems = cart.map(item => ({
+                order_id: order.id,
+                product_id: item.id,
+                quantity: item.quantity,
+                price: item.price,
+                size: item.size // Assuming we add size to order_items too, or store in metadata
+            }));
+
+            const { error: itemsError } = await supabase
+                .from('order_items')
+                .insert(orderItems);
+
+            if (itemsError) throw itemsError;
+
+            // 3. Prepare items for Mercado Pago
+            const items = cart.map(item => {
+                const unitPrice = Number(item.price);
+                const quantity = Number(item.quantity);
+                let pictureUrl = item.image_url || item.image;
+
+                // Validate picture_url: Must be absolute HTTP/HTTPS
+                if (pictureUrl && !pictureUrl.startsWith('http')) {
+                    pictureUrl = undefined;
+                }
+
+                // Safety checks
+                if (isNaN(unitPrice) || unitPrice <= 0) {
+                    throw new Error(`Precio inválido para el producto: ${item.name}`);
+                }
+                if (isNaN(quantity) || quantity <= 0) {
+                    throw new Error(`Cantidad inválida para el producto: ${item.name}`);
+                }
+
+                return {
+                    title: `${item.name} (${item.size})`.substring(0, 255),
+                    quantity: quantity,
+                    unit_price: unitPrice,
+                    currency_id: 'ARS',
+                    picture_url: pictureUrl
+                };
+            });
+
+            console.log("Enviando items a Mercado Pago:", items);
+
+            // 4. Call Edge Function with Order ID
+            const { data, error } = await supabase.functions.invoke('mp_create_preference', {
+                body: {
+                    items,
+                    user_id: order.id,
+                    origin: window.location.origin
+                }
+            });
+
+            if (error) {
+                // Try to parse detailed error from Edge Function
+                let errorDetails = error.message;
+                try {
+                    if (error instanceof Object && 'context' in error) {
+                        const body = await error.context.json();
+                        if (body.details) errorDetails += ` - ${body.details}`;
+                        else if (body.error) errorDetails += ` - ${body.error}`;
+                    }
+                } catch (e) {
+                    console.warn("Could not parse error details", e);
+                }
+                throw new Error(errorDetails);
             }
 
-            alert('¡Compra realizada con éxito! El stock ha sido actualizado.');
-            // Clear cart or redirect would go here
+            if (data && data.init_point) {
+                // Redirect to Mercado Pago
+                window.location.href = data.init_point;
+            } else {
+                throw new Error('No se recibió el link de pago.');
+            }
 
         } catch (error) {
             console.error('Error processing order:', error);

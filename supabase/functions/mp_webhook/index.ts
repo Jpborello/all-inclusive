@@ -47,7 +47,7 @@ serve(async (req) => {
         // 2) PARSEAR EVENTO
         // ------------------------------------------------------------
         let body: any = {};
-        try { body = await req.json(); } catch (_) {}
+        try { body = await req.json(); } catch (_) { }
 
         const topic = body?.type || body?.topic;
         const eventId = body?.data?.id;
@@ -140,6 +140,14 @@ serve(async (req) => {
                     merchant_order_id: order.id?.toString(),
                 });
 
+                // Update Order Status in 'orders' table
+                if (p.status === 'approved') {
+                    await supabase
+                        .from('orders')
+                        .update({ status: 'paid' })
+                        .eq('id', order.external_reference);
+                }
+
                 await supabase.from("pagos_historial").insert({
                     user_id: order.external_reference,
                     metodo: "Mercado Pago",
@@ -182,6 +190,14 @@ serve(async (req) => {
                 merchant_order_id: payment.merchant_order_id?.toString(),
                 preference_id: payment.preference_id
             });
+
+            // Update Order Status in 'orders' table
+            if (payment.status === 'approved') {
+                await supabase
+                    .from('orders')
+                    .update({ status: 'paid' })
+                    .eq('id', payment.external_reference);
+            }
 
             await supabase.from("pagos_historial").insert({
                 user_id: payment.external_reference,

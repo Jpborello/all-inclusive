@@ -100,8 +100,16 @@ const Orders = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {new Date(order.created_at).toLocaleDateString()}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {order.user_email || 'Invitado'}
+                                        <td className="px-6 py-4 text-sm text-gray-500">
+                                            <div className="font-medium text-gray-900">{order.shipping_details?.name || 'Invitado'}</div>
+                                            <div className="text-xs">{order.user_email}</div>
+                                            {order.shipping_details && (
+                                                <div className="text-xs mt-1 text-gray-400">
+                                                    <div>{order.shipping_details.phone}</div>
+                                                    <div>{order.shipping_details.address}</div>
+                                                    <div>{order.shipping_details.city}, {order.shipping_details.zip}</div>
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-500">
                                             <ul className="list-disc list-inside">

@@ -8,6 +8,7 @@ import ProductList from './components/product/ProductList';
 import ProductDetail from './components/product/ProductDetail';
 import Cart from './components/cart/Cart';
 import Checkout from './components/cart/Checkout';
+import Success from './components/cart/Success';
 import SocialFloatingButtons from './components/common/SocialFloatingButtons';
 
 import AdminLayout from './components/admin/AdminLayout';
@@ -34,6 +35,7 @@ function App() {
         <Route path="/producto/:id" element={<ProductDetail />} />
         <Route path="/carrito" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/success" element={<Success />} />
 
         {/* Admin */}
         <Route path="/admin/login" element={<Login />} />

@@ -137,15 +137,20 @@ const ProductDetail = () => {
                                             }}
                                             disabled={!isAvailable}
                                             className={`
-                                                group relative border rounded-md py-3 px-4 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1
-                                                ${!isAvailable ? 'bg-gray-50 text-gray-200 cursor-not-allowed' : ''}
-                                                ${selectedSize === size ? 'border-brand-gold ring-2 ring-brand-gold text-brand-dark' : 'border-gray-200 text-gray-900'}
+                                                group relative border rounded-md py-3 px-4 flex flex-col items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1
+                                                ${!isAvailable ? 'bg-gray-50 text-gray-300 cursor-not-allowed opacity-60' : ''}
+                                                ${selectedSize === size ? 'border-brand-gold ring-2 ring-brand-gold text-brand-dark bg-brand-gold/5' : 'border-gray-200 text-gray-900'}
                                             `}
                                         >
-                                            <span>{size}</span>
+                                            <span className="font-bold">{size}</span>
+                                            {isAvailable && (
+                                                <span className="text-[10px] text-gray-500 mt-1">
+                                                    ({qty} disp.)
+                                                </span>
+                                            )}
                                             {!isAvailable && (
                                                 <span className="absolute inset-0 w-full h-full flex items-center justify-center">
-                                                    <span className="w-full border-t border-gray-200 -rotate-45"></span>
+                                                    <span className="w-full border-t border-gray-300 -rotate-45"></span>
                                                 </span>
                                             )}
                                         </button>
