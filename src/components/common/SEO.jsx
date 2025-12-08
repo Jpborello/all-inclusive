@@ -49,24 +49,23 @@ const SEO = ({
             <meta name="twitter:description" content={finalDescription} />
             <meta name="twitter:image" content={finalImage} />
 
-            {/* ==== Schema JSON-LD estructurado (A Google le encanta) ==== */}
+            {/* ==== Schema JSON-LD (Versión Blindada) ==== */}
             <script type="application/ld+json">
-                {`
-                {
+                {JSON.stringify({
                     "@context": "https://schema.org",
                     "@type": "ClothingStore",
                     "name": "All Inclusive",
-                    "image": "${finalImage}",
-                    "url": "${finalUrl}",
-                    "description": "${finalDescription}",
+                    "image": finalImage,
+                    "url": finalUrl,
+                    "description": finalDescription,
                     "address": {
-                    "@type": "PostalAddress",
-                    "addressLocality": "Rosario",
-                    "addressRegion": "Santa Fe",
-                    "addressCountry": "Argentina"
-                    }
-                }
-                `}
+                        "@type": "PostalAddress",
+                        "addressLocality": "Rosario",
+                        "addressRegion": "Santa Fe",
+                        "addressCountry": "Argentina"
+                    },
+                    "priceRange": "$$" // Agregado recomendado
+                })}
             </script>
         </Helmet>
     );
