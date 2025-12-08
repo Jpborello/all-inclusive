@@ -9,4 +9,6 @@ export const categories = [
     { id: 4, name: "Camperas", image: "https://placehold.co/400x400/051626/D4AF37?text=Camperas" },
     { id: 5, name: "Pantalon Gabardina", image: "https://placehold.co/400x400/051626/D4AF37?text=Gabardina" },
     { id: 6, name: "Short Baño", image: "https://placehold.co/400x400/051626/D4AF37?text=Short+Bano" },
+    { id: 7, name: "Chombas", image: "https://placehold.co/400x400/051626/D4AF37?text=Chombas" },
+    { id: 8, name: "Conjuntos", image: "https://placehold.co/400x400/051626/D4AF37?text=Conjuntos" },
 ];

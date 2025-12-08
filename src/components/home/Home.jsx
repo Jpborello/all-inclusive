@@ -14,9 +14,28 @@ const Home = () => {
     const [status, setStatus] = useState(null);
 
     useEffect(() => {
-        fetchFeaturedProducts();
-        fetchCategoriesWithImages();
+        const init = async () => {
+            await ensureCategoriesExist();
+            fetchFeaturedProducts();
+            fetchCategoriesWithImages();
+        };
+        init();
     }, []);
+
+    const ensureCategoriesExist = async () => {
+        const requiredCats = [
+            { name: 'Chombas', slug: 'chombas' },
+            { name: 'Conjuntos', slug: 'conjuntos' }
+        ];
+
+        for (const cat of requiredCats) {
+            const { data } = await supabase.from('categories').select('id').eq('slug', cat.slug).maybeSingle();
+            if (!data) {
+                console.log(`Auto-creating category: ${cat.name}`);
+                await supabase.from('categories').insert(cat);
+            }
+        }
+    };
 
     const fetchFeaturedProducts = async () => {
         const { data } = await supabase
