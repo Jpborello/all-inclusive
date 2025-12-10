@@ -8,6 +8,7 @@ const SEO = ({
     image,
     url,
     type = "website",
+    price,
 }) => {
     const siteTitle = "All Inclusive | Indumentaria Masculina en Rosario";
     const defaultDescription =
@@ -15,7 +16,7 @@ const SEO = ({
     const defaultKeywords =
         "indumentaria masculina, ropa hombre, rosario, santa fe, pantalones, camisas, camisas de lino, moda hombre, all inclusive, tienda de ropa hombre, jeans hombre, chombas, bermudas";
     const defaultImage = "https://allinclusive.com.ar/og-image.jpg"; // Cambiar cuando tengas la OG real
-    const siteUrl = "https://allinclusive.com.ar";
+    const siteUrl = "https://www.allinclusive.com.ar";
 
     const finalTitle = title ? `${title} | All Inclusive` : siteTitle;
     const finalDescription = description || defaultDescription;
@@ -24,6 +25,42 @@ const SEO = ({
         : defaultKeywords;
     const finalImage = image || defaultImage;
     const finalUrl = url ? `${siteUrl}${url}` : siteUrl;
+
+    const schema = type === 'product' ? {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": finalTitle,
+        "image": finalImage,
+        "description": finalDescription,
+        "url": finalUrl,
+        "brand": {
+            "@type": "Brand",
+            "name": "All Inclusive"
+        },
+        "offers": {
+            "@type": "Offer",
+            "url": finalUrl,
+            "priceCurrency": "ARS",
+            "price": price || (description ? description.match(/\$([\d.,]+)/)?.[1]?.replace(/[.,]/g, '') : "0"), // Use prop first, then fallback
+            "availability": "https://schema.org/InStock",
+            "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+            "itemCondition": "https://schema.org/NewCondition"
+        }
+    } : {
+        "@context": "https://schema.org",
+        "@type": "ClothingStore",
+        "name": "All Inclusive",
+        "image": finalImage,
+        "url": finalUrl,
+        "description": finalDescription,
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Rosario",
+            "addressRegion": "Santa Fe",
+            "addressCountry": "Argentina"
+        },
+        "priceRange": "$$"
+    };
 
     return (
         <Helmet>
@@ -49,23 +86,9 @@ const SEO = ({
             <meta name="twitter:description" content={finalDescription} />
             <meta name="twitter:image" content={finalImage} />
 
-            {/* ==== Schema JSON-LD (Versión Blindada) ==== */}
+            {/* ==== Schema JSON-LD ==== */}
             <script type="application/ld+json">
-                {JSON.stringify({
-                    "@context": "https://schema.org",
-                    "@type": "ClothingStore",
-                    "name": "All Inclusive",
-                    "image": finalImage,
-                    "url": finalUrl,
-                    "description": finalDescription,
-                    "address": {
-                        "@type": "PostalAddress",
-                        "addressLocality": "Rosario",
-                        "addressRegion": "Santa Fe",
-                        "addressCountry": "Argentina"
-                    },
-                    "priceRange": "$$" // Agregado recomendado
-                })}
+                {JSON.stringify(schema)}
             </script>
         </Helmet>
     );

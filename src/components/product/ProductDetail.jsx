@@ -76,6 +76,7 @@ const ProductDetail = () => {
                 url={`/producto/${product.id}`}
                 keywords={`${product.name}, ${product.categories?.name}, ropa hombre, rosario`}
                 type="product"
+                price={product.price}
             />
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Image Gallery */}
