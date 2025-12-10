@@ -100,7 +100,7 @@ const Home = () => {
             <SEO
                 title="Inicio"
                 description="Bienvenido a All Inclusive. La mejor indumentaria masculina en Rosario. Encontrá pantalones, camisas, remeras y más."
-                keywords="ropa hombre rosario, indumentaria masculina santa fe, moda hombre, all inclusive rosario"
+                keywords="ropa hombre rosario, indumentaria masculina santa fe, moda hombre, all inclusive rosario, indumentaria para hombres, camisa de lino"
             />
             <HeroCarousel />
 

@@ -13,7 +13,7 @@ const SEO = ({
     const defaultDescription =
         "All Inclusive ofrece la mejor indumentaria masculina en Rosario, Santa Fe. Pantalones, camisas, remeras y más con estilo y calidad premium.";
     const defaultKeywords =
-        "indumentaria masculina, ropa hombre, rosario, santa fe, pantalones, camisas, moda hombre, all inclusive";
+        "indumentaria masculina, ropa hombre, rosario, santa fe, pantalones, camisas, camisas de lino, moda hombre, all inclusive, tienda de ropa hombre, jeans hombre, chombas, bermudas";
     const defaultImage = "https://allinclusive.com.ar/og-image.jpg"; // Cambiar cuando tengas la OG real
     const siteUrl = "https://allinclusive.com.ar";
 
