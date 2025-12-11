@@ -8,7 +8,8 @@ const SEO = ({
     image,
     url,
     type = "website",
-    price,
+    sku,
+    availability,
 }) => {
     const siteTitle = "All Inclusive | Indumentaria Masculina en Rosario";
     const defaultDescription =
@@ -33,6 +34,7 @@ const SEO = ({
         "image": finalImage,
         "description": finalDescription,
         "url": finalUrl,
+        "sku": sku || undefined,
         "brand": {
             "@type": "Brand",
             "name": "All Inclusive"
@@ -42,7 +44,7 @@ const SEO = ({
             "url": finalUrl,
             "priceCurrency": "ARS",
             "price": price || (description ? description.match(/\$([\d.,]+)/)?.[1]?.replace(/[.,]/g, '') : "0"), // Use prop first, then fallback
-            "availability": "https://schema.org/InStock",
+            "availability": availability || "https://schema.org/InStock",
             "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
             "itemCondition": "https://schema.org/NewCondition"
         }

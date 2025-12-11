@@ -77,6 +77,8 @@ const ProductDetail = () => {
                 keywords={`${product.name}, ${product.categories?.name}, ropa hombre, rosario`}
                 type="product"
                 price={product.price}
+                sku={product.id}
+                availability={product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"}
             />
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Image Gallery */}
