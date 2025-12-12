@@ -10,6 +10,7 @@ const SEO = ({
     type = "website",
     sku,
     availability,
+    price,
 }) => {
     const siteTitle = "All Inclusive | Indumentaria Masculina en Rosario";
     const defaultDescription =
@@ -90,7 +91,7 @@ const SEO = ({
 
             {/* ==== Schema JSON-LD ==== */}
             <script type="application/ld+json">
-                {JSON.stringify(schema)}
+                {JSON.stringify(schema).replace(/</g, '\\u003c')}
             </script>
         </Helmet>
     );
