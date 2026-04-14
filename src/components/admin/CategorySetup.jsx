@@ -6,10 +6,12 @@ const CategorySetup = () => {
     const [logs, setLogs] = useState([]);
 
     const categoriesToAdd = [
-        { name: 'Boxer', slug: 'boxer' },
-        { name: 'Accesorios', slug: 'accesorios' },
-        { name: 'Sudaderas', slug: 'sudaderas' },
-        { name: 'Musculosas', slug: 'musculosas' }
+        { name: 'Pantalones', slug: 'pantalones' },
+        { name: 'Buzos', slug: 'buzos' },
+        { name: 'Sweaters', slug: 'sweaters' },
+        { name: 'Camperas', slug: 'camperas' },
+        { name: 'Remeras Mangas Largas', slug: 'remeras-mangas-largas' },
+        { name: 'Cintos', slug: 'cintos' }
     ];
 
     const addLog = (msg) => setLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${msg}`]);
